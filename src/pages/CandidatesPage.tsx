@@ -38,6 +38,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   Search,
   Plus,
+  UserPlus,
   MoreHorizontal,
   Mail,
   Loader2,
@@ -576,12 +577,12 @@ export default function CandidatesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.location.href = `mailto:${candidate.email}`}>
                               <Mail className="mr-2 h-4 w-4" />
                               Send Email
                             </DropdownMenuItem>
                             {candidate.resumeUrl && (
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.open(candidate.resumeUrl, '_blank')}>
                                 <ExternalLink className="mr-2 h-4 w-4" />
                                 View Resume
                               </DropdownMenuItem>
@@ -606,8 +607,22 @@ export default function CandidatesPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <p className="text-muted-foreground">No candidates found</p>
+                    <TableCell colSpan={6}>
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                          <UserPlus className="h-7 w-7 text-primary/50" />
+                        </div>
+                        <h3 className="font-semibold">
+                          {search || statusFilter !== 'all' || departmentFilter !== 'all'
+                            ? 'No candidates match your filters'
+                            : 'No candidates yet'}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mt-1 max-w-xs">
+                          {search || statusFilter !== 'all' || departmentFilter !== 'all'
+                            ? 'Try adjusting your search or filters.'
+                            : 'Add your first candidate to start building your hiring pipeline.'}
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}

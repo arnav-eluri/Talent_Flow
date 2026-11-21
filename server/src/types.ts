@@ -43,7 +43,7 @@ export interface InterviewFeedback {
   rating: number;
   strengths: string[];
   weaknesses: string[];
-  recommendation: 'strong_hire' | 'hire' | 'no_hire' | 'strong_no_hire';
+  recommendation: 'strong_hire' | 'hire' | 'not_sure' | 'no_hire' | 'strong_no_hire';
   notes: string;
 }
 

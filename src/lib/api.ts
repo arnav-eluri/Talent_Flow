@@ -291,6 +291,14 @@ class ApiClient {
   async getAnalytics() {
     return this.request('/analytics');
   }
+
+  // Users
+  async updateProfile(data: { name?: string; email?: string }) {
+    return this.request('/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const api = new ApiClient();

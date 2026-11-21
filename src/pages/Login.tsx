@@ -3,9 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, Eye, EyeOff } from 'lucide-react';
-import GradientBackground from '@/components/GradientBackground';
+import { Briefcase, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,100 +19,143 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     const success = await login(email, password);
-    
     if (success) {
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully logged in.',
-      });
       navigate('/');
     } else {
       toast({
         title: 'Login failed',
-        description: 'Please check your credentials and try again.',
+        description: 'Invalid credentials. Please try again.',
         variant: 'destructive',
       });
     }
-    
     setLoading(false);
   };
 
   return (
-    <>
-      <GradientBackground />
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-background flex">
+      {/* Left brand panel */}
+      <div className="hidden lg:flex lg:w-5/12 bg-[hsl(var(--sidebar-background))] flex-col p-12 relative overflow-hidden shrink-0">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 50%, hsl(172 65% 36% / 0.4) 0%, transparent 60%), radial-gradient(circle at 80% 20%, hsl(172 65% 55% / 0.25) 0%, transparent 50%)',
+          }}
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[hsl(var(--primary))] flex items-center justify-center">
+            <Briefcase className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-white font-semibold text-lg">TalentFlow</span>
+        </div>
+
+        <div className="relative mt-auto">
+          <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+            Streamline your
+            <br />
+            hiring pipeline
+          </h1>
+          <p className="text-[hsl(var(--sidebar-foreground))] text-base leading-relaxed max-w-sm">
+            From sourcing to onboarding, TalentFlow brings your entire HR
+            workflow into one place.
+          </p>
+          <div className="mt-10 flex gap-8">
+            {[
+              { value: '40%', label: 'Faster time-to-hire' },
+              { value: '2×', label: 'Pipeline visibility' },
+              { value: '98%', label: 'User satisfaction' },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-xs text-[hsl(var(--sidebar-foreground))] mt-0.5">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <Card className="w-full max-w-md relative glass">
-        <CardHeader className="text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center mx-auto mb-4">
-            <Briefcase className="w-8 h-8 text-white" />
+      {/* Right form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden flex items-center gap-2.5 mb-8">
+            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--primary))] flex items-center justify-center">
+              <Briefcase className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-semibold text-foreground">TalentFlow</span>
           </div>
-          <CardTitle className="text-2xl font-display">Welcome to TalentFlow</CardTitle>
-          <CardDescription>
-            Sign in to access your HR dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+
+          <h2 className="text-2xl font-bold text-foreground mb-1">
+            Welcome back
+          </h2>
+          <p className="text-muted-foreground text-sm mb-8">
+            Sign in to your account to continue
+          </p>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="h-10"
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-10 pr-10"
                   required
                 />
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
                   ) : (
                     <Eye className="h-4 w-4" />
                   )}
-                </Button>
+                </button>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+            <Button
+              type="submit"
+              className="w-full h-10 font-medium"
+              disabled={loading}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sign In
             </Button>
           </form>
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            Demo credentials are pre-filled. Just click Sign In.
+
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            Demo credentials are pre-filled — just click Sign In.
           </p>
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-sm text-center text-muted-foreground mt-4">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
+            <Link
+              to="/signup"
+              className="text-[hsl(var(--primary))] hover:underline font-medium"
+            >
               Sign Up
             </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

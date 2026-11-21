@@ -300,6 +300,26 @@ export default function Employees() {
         <div className="p-8 text-center text-destructive">
           <p>Failed to load employees. Please try again.</p>
         </div>
+      ) : filteredEmployees.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <Users className="h-8 w-8 text-primary/50" />
+          </div>
+          <h3 className="font-semibold text-lg">
+            {search || departmentFilter !== 'all' ? 'No employees match your filters' : 'No employees yet'}
+          </h3>
+          <p className="text-muted-foreground text-sm mt-1 max-w-xs">
+            {search || departmentFilter !== 'all'
+              ? 'Try adjusting your search or filters.'
+              : 'Add your first team member to get started.'}
+          </p>
+          {!search && departmentFilter === 'all' && (
+            <Button className="mt-4 gap-2" onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Add Employee
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredEmployees.map((employee) => (

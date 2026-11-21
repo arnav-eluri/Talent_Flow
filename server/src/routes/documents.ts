@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { documents } from '../data.js';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { persist } from '../store.js';
 
 const router = Router();
 
@@ -59,6 +60,7 @@ router.post('/', (req, res) => {
     uploadedAt: new Date().toISOString().split('T')[0],
   };
   documents.push(newDocument);
+  persist('documents', documents);
   res.status(201).json(newDocument);
 });
 
@@ -82,6 +84,7 @@ router.post('/upload', upload.single('file'), (req: AuthRequest, res) => {
     };
 
     documents.push(newDocument);
+    persist('documents', documents);
     res.status(201).json(newDocument);
   } catch (error) {
     console.error('Upload error:', error);
@@ -121,6 +124,7 @@ router.delete('/:id', (req, res) => {
   }
   
   documents.splice(index, 1);
+  persist('documents', documents);
   res.json({ message: 'Document deleted' });
 });
 

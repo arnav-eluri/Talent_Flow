@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import { Settings as SettingsIcon, Bell, Lock, Palette } from 'lucide-react';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   const [formData, setFormData] = useState({
@@ -24,11 +25,18 @@ export default function Settings() {
   });
   const [theme, setTheme] = useState('light');
 
-  const handleSaveProfile = () => {
-    toast({
-      title: 'Profile updated',
-      description: 'Your profile changes have been saved.',
-    });
+  const handleSaveProfile = async () => {
+    try {
+      const response = await api.updateProfile(formData);
+      updateUser(response.user);
+      toast({ title: 'Profile updated', description: 'Your profile changes have been saved.' });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save profile',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSaveNotifications = () => {

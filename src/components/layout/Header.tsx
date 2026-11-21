@@ -1,8 +1,7 @@
 import { Search, Settings, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TutorialWidget } from '@/components/TutorialWidget';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,19 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
 
+const routeTitles: Record<string, string> = {
+  '/': 'Dashboard',
+  '/candidates': 'Candidates',
+  '/interviews': 'Interviews',
+  '/employees': 'Employees',
+  '/onboarding': 'Onboarding',
+  '/offboarding': 'Offboarding',
+  '/documents': 'Documents',
+  '/analytics': 'Analytics',
+  '/settings': 'Settings',
+  '/hr-dashboard': 'HR Dashboard',
+};
+
 interface HeaderProps {
   onMenuClick?: () => void;
 }
@@ -23,6 +35,9 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const pageTitle = routeTitles[location.pathname] ?? 'TalentFlow';
 
   const roles: { value: UserRole; label: string }[] = [
     { value: 'hr', label: 'HR Manager' },
@@ -31,91 +46,94 @@ export function Header({ onMenuClick }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-white/20 bg-white/10 backdrop-blur supports-[backdrop-filter]:bg-white/10">
-      <div className="flex h-full items-center justify-between px-4 md:px-6 lg:px-8 gap-4 mx-auto max-w-7xl">
-        {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onMenuClick}
-          className="md:hidden text-[#1b1833] hover:bg-white/20"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+    <header className="sticky top-0 z-30 h-14 border-b border-border bg-card flex items-center px-4 md:px-6 gap-4 shrink-0">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onMenuClick}
+        className="md:hidden h-8 w-8 shrink-0"
+      >
+        <Menu className="h-4 w-4" />
+      </Button>
 
-        {/* Search */}
-        <div className="hidden sm:flex flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1b1833]/60" />
-            <Input
-              placeholder="Search candidates, employees..."
-              className="pl-10 bg-white/40 border-0 focus-visible:ring-1 text-[#1b1833] placeholder:text-[#1b1833]/60"
-            />
-          </div>
+      <h1 className="text-sm font-semibold text-foreground hidden md:block shrink-0">{pageTitle}</h1>
+
+      <div className="hidden md:block w-px h-4 bg-border shrink-0" />
+
+      <div className="hidden sm:flex flex-1 max-w-xs">
+        <div className="relative w-full">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            className="pl-8 h-8 text-sm bg-background"
+          />
         </div>
+      </div>
 
-        {/* Right section */}
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Role switcher (demo only) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 text-[#1b1833] hover:bg-white/20">
-                <Badge variant="secondary" className="capitalize bg-white/40 text-[#1b1833]">
-                  {user?.role}
-                </Badge>
-                <span className="hidden md:inline">View as</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {roles.map((role) => (
-                <DropdownMenuItem
-                  key={role.value}
-                  onClick={() => switchRole(role.value)}
-                  className={user?.role === role.value ? 'bg-accent' : ''}
-                >
-                  {role.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Tutorial Widget */}
-          <TutorialWidget />
-
-          {/* User menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:bg-white/20">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.avatar} alt={user?.name} />
-                  <AvatarFallback className="bg-white/40 text-[#1b1833]">
-                    {user?.name?.split(' ').map((n) => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium text-[#1b1833]">{user?.name}</p>
-                  <p className="text-xs text-[#1b1833]/60">{user?.email}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+      <div className="flex items-center gap-2 ml-auto">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex h-8 text-xs gap-1.5 font-normal"
+            >
+              <span className="text-muted-foreground">Role:</span>
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 capitalize font-medium h-4"
+              >
+                {user?.role}
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuLabel className="text-xs text-muted-foreground font-normal pb-1">
+              Switch role (demo)
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {roles.map((role) => (
+              <DropdownMenuItem
+                key={role.value}
+                onClick={() => switchRole(role.value)}
+                className={user?.role === role.value ? 'bg-accent' : ''}
+              >
+                {role.label}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback className="text-[11px] bg-primary text-primary-foreground font-semibold">
+                  {user?.name?.split(' ').map((n) => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-0.5">
+                <p className="text-sm font-medium">{user?.name}</p>
+                <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

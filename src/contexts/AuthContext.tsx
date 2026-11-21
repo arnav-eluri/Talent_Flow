@@ -9,6 +9,7 @@ interface AuthContextType {
   signup: (email: string, password: string, role: UserRole, name: string) => Promise<boolean>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,6 +76,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...updates };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -84,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         switchRole,
+        updateUser,
       }}
     >
       {children}

@@ -2,11 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Preloader from "@/components/Preloader";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Dashboard from "./pages/Dashboard";
 import HRDashboard from "./pages/HRDashboard";
 import CandidatesPage from "./pages/CandidatesPage";
@@ -26,64 +26,16 @@ const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <AppLayout>{children}</AppLayout>;
-}
-
-function RouteChangeHandler({ children }: { children: React.ReactNode }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-  const location = useLocation();
-
-  useEffect(() => {
-    setIsLoading(true);
-    setIsFadingOut(false);
-    
-    // Fixed duration of 0.8 seconds
-    const duration = 800;
-    
-    // Start fade out 200ms before the end
-    const fadeOutTimer = setTimeout(() => {
-      setIsFadingOut(true);
-    }, duration - 200);
-    
-    // Hide preloader after fade completes
-    const hideTimer = setTimeout(() => {
-      setIsLoading(false);
-      setIsFadingOut(false);
-    }, duration + 800);
-    
-    return () => {
-      clearTimeout(fadeOutTimer);
-      clearTimeout(hideTimer);
-    };
-  }, [location.pathname]);
-
-  return (
-    <>
-      <Preloader isVisible={isLoading} isFadingOut={isFadingOut} />
-      {children}
-    </>
-  );
 }
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
-  
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} 
-      />
-      <Route 
-        path="/signup" 
-        element={isAuthenticated ? <Navigate to="/" replace /> : <SignUp />} 
-      />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/signup" element={isAuthenticated ? <Navigate to="/" replace /> : <SignUp />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/hr-dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
       <Route path="/candidates" element={<ProtectedRoute><CandidatesPage /></ProtectedRoute>} />
@@ -100,20 +52,23 @@ function AppRoutes() {
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <RouteChangeHandler>
+const App = () => {
+  const [booted, setBooted] = useState(false);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        {!booted && <Preloader onDone={() => setBooted(true)} />}
+        <BrowserRouter>
+          <AuthProvider>
             <AppRoutes />
-          </RouteChangeHandler>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

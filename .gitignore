@@ -22,6 +22,10 @@ server/node_modules
 server/dist
 server/.env
 
+# Persistence data (local JSON store)
+/data/
+server/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

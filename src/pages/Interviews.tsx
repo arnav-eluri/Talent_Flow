@@ -76,6 +76,7 @@ export default function Interviews() {
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
   const [isAIInterviewDialogOpen, setIsAIInterviewDialogOpen] = useState(false);
   const [isJoinInterviewDialogOpen, setIsJoinInterviewDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
   const [feedbackData, setFeedbackData] = useState<any>({});
@@ -551,7 +552,12 @@ export default function Interviews() {
                       <MessageSquare className="h-4 w-4" />
                       {interview.feedback ? 'Edit Feedback' : 'Add Feedback'}
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => { setSelectedInterview(interview); setIsDetailsDialogOpen(true); }}
+                    >
                       View Details
                     </Button>
                   </div>
@@ -883,6 +889,46 @@ export default function Interviews() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Interview Details Modal */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Interview Details</DialogTitle>
+            <DialogDescription>
+              {selectedInterview?.candidateName} — {selectedInterview?.position}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedInterview && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <span className="font-medium text-muted-foreground">Date</span>
+                <span>{format(new Date(selectedInterview.scheduledAt), 'MMM d, yyyy')}</span>
+                <span className="font-medium text-muted-foreground">Time</span>
+                <span>{format(new Date(selectedInterview.scheduledAt), 'h:mm a')}</span>
+                <span className="font-medium text-muted-foreground">Duration</span>
+                <span>{selectedInterview.duration} min</span>
+                <span className="font-medium text-muted-foreground">Type</span>
+                <Badge variant="outline" className="capitalize w-fit">{selectedInterview.type}</Badge>
+                <span className="font-medium text-muted-foreground">Status</span>
+                <Badge variant="outline" className="capitalize w-fit">{selectedInterview.status}</Badge>
+                <span className="font-medium text-muted-foreground">Interviewers</span>
+                <span>{selectedInterview.interviewers?.join(', ')}</span>
+              </div>
+              {selectedInterview.feedback && (
+                <div className="pt-2 border-t space-y-1">
+                  <p className="font-medium">Feedback</p>
+                  <p><span className="text-muted-foreground">Rating:</span> {selectedInterview.feedback.rating}/5</p>
+                  <p><span className="text-muted-foreground">Recommendation:</span> <span className="capitalize">{selectedInterview.feedback.recommendation?.replace(/_/g, ' ')}</span></p>
+                  {selectedInterview.feedback.notes && (
+                    <p><span className="text-muted-foreground">Notes:</span> {selectedInterview.feedback.notes}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

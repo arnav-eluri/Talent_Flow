@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { offboardingTasks } from '../data.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { persist } from '../store.js';
 
 const router = Router();
 
@@ -9,8 +10,7 @@ router.use(authMiddleware);
 router.get('/', (req, res) => {
   const { employeeId } = req.query;
   if (employeeId) {
-    const tasks = offboardingTasks.filter(t => t.employeeId === employeeId);
-    return res.json(tasks);
+    return res.json(offboardingTasks.filter(t => t.employeeId === employeeId));
   }
   res.json(offboardingTasks);
 });
@@ -25,10 +25,11 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const newTask = {
-    id: String(offboardingTasks.length + 1),
+    id: String(Math.max(...offboardingTasks.map(t => parseInt(t.id) || 0), 0) + 1),
     ...req.body,
   };
   offboardingTasks.push(newTask);
+  persist('offboardingTasks', offboardingTasks);
   res.status(201).json(newTask);
 });
 
@@ -38,6 +39,7 @@ router.put('/:id', (req, res) => {
     return res.status(404).json({ error: 'Task not found' });
   }
   offboardingTasks[index] = { ...offboardingTasks[index], ...req.body };
+  persist('offboardingTasks', offboardingTasks);
   res.json(offboardingTasks[index]);
 });
 
@@ -47,6 +49,7 @@ router.delete('/:id', (req, res) => {
     return res.status(404).json({ error: 'Task not found' });
   }
   offboardingTasks.splice(index, 1);
+  persist('offboardingTasks', offboardingTasks);
   res.json({ message: 'Task deleted' });
 });
 

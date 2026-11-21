@@ -13,36 +13,29 @@ interface StatCardProps {
 }
 
 export function StatCard({ title, value, change, icon, trend, className }: StatCardProps) {
+  const isPositive = trend === 'up';
   return (
     <Card className={cn('overflow-hidden', className)}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
-            {change !== undefined && (
-              <div className="flex items-center gap-1">
-                {trend === 'up' ? (
-                  <TrendingUp className="h-4 w-4 text-success" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-destructive" />
-                )}
-                <span
-                  className={cn(
-                    'text-sm font-medium',
-                    trend === 'up' ? 'text-success' : 'text-destructive'
-                  )}
-                >
-                  {change > 0 ? '+' : ''}{change}%
-                </span>
-                <span className="text-sm text-muted-foreground">vs last month</span>
-              </div>
-            )}
-          </div>
-          <div className="rounded-xl bg-primary/10 p-3">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-4">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+          <div className="rounded-lg bg-primary/10 p-2 shrink-0">
             {icon}
           </div>
         </div>
+        <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+        {change !== undefined && (
+          <div className="flex items-center gap-1 mt-2">
+            <div className={cn(
+              'flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full',
+              isPositive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive',
+            )}>
+              {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {change > 0 ? '+' : ''}{change}%
+            </div>
+            <span className="text-xs text-muted-foreground">vs last month</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

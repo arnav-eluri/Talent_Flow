@@ -27,13 +27,14 @@ A modern, responsive HR platform built with **React, TypeScript, and Tailwind CS
 Our design is based on a clean, modern, and accessible HR interface with consistent UI patterns.
 
 ###  Color Palette
-- Primary: #8B5CF6 (Purple)
-- Secondary: Soft Lavender background
+- Primary: `hsl(172, 65%, 36%)` — deep forest teal (unique in HR SaaS)
+- Sidebar: `hsl(172, 55%, 9%)` — deep dark teal
+- Background: `hsl(168, 20%, 97%)` — teal-tinted off-white
 - Accents: Blue, Green, Yellow, Red for status badges
-- Neutral greys for text hierarchy
+- Neutral teal-greys for text hierarchy
 
 ###  Typography
-- **Inter** – clean, geometric sans-serif
+- **Aptos** – Microsoft’s modern humanist sans-serif (system font on Windows 11+), falls back to Segoe UI
 - Consistent font sizes using Tailwind’s scale
 
 ###  Spacing & Layout
@@ -55,14 +56,27 @@ Reusable components designed:
 ## Project Structure
 ```bash
 src/
-├── components/ # Dashboard, Layout, UI components
-├── contexts/ # React contexts
-├── data/ # Mock data
-├── hooks/ # Custom hooks
-├── lib/ # Utilities
-├── pages/ # All pages
-├── styles/ # Global styles
-└── types/ # TypeScript definitions
+├── components/
+│   ├── ui/          # shadcn/ui primitives
+│   ├── layout/      # AppLayout, Header, Sidebar
+│   └── dashboard/   # Dashboard widgets
+├── contexts/        # React contexts (AuthContext)
+├── hooks/           # Custom hooks
+├── lib/             # API client, utilities
+├── pages/           # Page components
+├── types/           # TypeScript types
+├── App.tsx
+├── main.tsx
+└── index.css
+
+server/
+├── src/
+│   ├── routes/      # Express route handlers
+│   ├── data.ts      # In-memory data store (seeded from JSON)
+│   ├── store.ts     # JSON persistence helpers
+│   ├── types.ts     # Shared TypeScript types
+│   └── index.ts     # Express entry point
+└── package.json
 ```
 
 ## Getting Started

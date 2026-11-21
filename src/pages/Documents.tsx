@@ -77,8 +77,10 @@ function formatFileSize(bytes: number): string {
 
 export default function Documents() {
   const [search, setSearch] = useState('');
-const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<any>({});
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [docType, setDocType] = useState('');
+  const [docName, setDocName] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -87,16 +89,16 @@ const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     queryFn: () => api.getDocuments(),
   });
 
-const createMutation = useMutation({
-    mutationFn: (data: any) => api.createDocument(data),
+  const uploadMutation = useMutation({
+    mutationFn: ({ file, type, name }: { file: File; type: string; name: string }) =>
+      api.uploadDocument(file, type, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       setIsUploadDialogOpen(false);
-      setFormData({});
-      toast({
-        title: 'Success',
-        description: 'Document uploaded successfully',
-      });
+      setDocType('');
+      setDocName('');
+      setSelectedFile(null);
+      toast({ title: 'Success', description: 'Document uploaded successfully' });
     },
     onError: (error: any) => {
       toast({
@@ -126,20 +128,15 @@ const createMutation = useMutation({
   });
 
   const handleUploadDocument = () => {
-    if (!formData.name || !formData.type) {
+    if (!docName || !docType || !selectedFile) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields',
+        description: 'Please fill in all required fields and select a file',
         variant: 'destructive',
       });
       return;
     }
-    createMutation.mutate({
-      ...formData,
-      uploadedBy: 'Current User',
-      size: Math.floor(Math.random() * 5000000),
-      url: '#',
-    });
+    uploadMutation.mutate({ file: selectedFile, type: docType, name: docName });
   };
 
   const handleDownload = async (id: string, name: string) => {
@@ -201,20 +198,16 @@ const createMutation = useMutation({
                 <Label htmlFor="docName">Document Name *</Label>
                 <Input
                   id="docName"
-                  value={formData.name || ''}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  value={docName}
+                  onChange={(e) => setDocName(e.target.value)}
                   placeholder="Document name"
                 />
               </div>
               <div>
                 <Label htmlFor="docType">Document Type *</Label>
                 <Select
-                  value={formData.type || ''}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, type: value })
-                  }
+                  value={docType}
+                  onValueChange={setDocType}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -229,24 +222,25 @@ const createMutation = useMutation({
                 </Select>
               </div>
               <div>
-                <Label htmlFor="docFile">File</Label>
+                <Label htmlFor="docFile">File *</Label>
                 <Input
                   id="docFile"
                   type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setFormData({ ...formData, fileName: file.name })
-                    }
-                  }}
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
                 />
+                {selectedFile && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                )}
               </div>
               <Button
                 onClick={handleUploadDocument}
-                disabled={createMutation.isPending}
+                disabled={uploadMutation.isPending}
                 className="w-full"
               >
-                {createMutation.isPending ? 'Uploading...' : 'Upload Document'}
+                {uploadMutation.isPending ? 'Uploading...' : 'Upload Document'}
               </Button>
             </div>
           </DialogContent>

@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { candidates } from '@/data/mockData';
+import { ArrowRight, UserPlus } from 'lucide-react';
+import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 const statusColors: Record<string, string> = {
@@ -17,7 +18,12 @@ const statusColors: Record<string, string> = {
 };
 
 export function RecentCandidates() {
-  const recentCandidates = candidates.slice(0, 5);
+  const { data } = useQuery({
+    queryKey: ['candidates', { limit: 5 }],
+    queryFn: () => api.getCandidates({ limit: 5 }),
+  });
+
+  const recent = data?.data?.slice(0, 5) ?? [];
 
   return (
     <Card>
@@ -30,49 +36,36 @@ export function RecentCandidates() {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {recentCandidates.map((candidate) => (
-            <div
-              key={candidate.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                    {candidate.name.split(' ').map((n) => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{candidate.name}</p>
-                  <p className="text-sm text-muted-foreground">{candidate.position}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">AI Score</span>
-                    <span
-                      className={cn(
-                        'text-sm font-bold',
-                        candidate.aiScore >= 90 ? 'text-success' :
-                        candidate.aiScore >= 80 ? 'text-primary' :
-                        candidate.aiScore >= 70 ? 'text-warning' : 'text-destructive'
-                      )}
-                    >
-                      {candidate.aiScore}
-                    </span>
+        {recent.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+            <UserPlus className="h-8 w-8 mb-2 opacity-30" />
+            <p className="text-sm">No candidates yet</p>
+            <Button variant="link" size="sm" asChild className="mt-1 h-auto p-0 text-sm">
+              <Link to="/candidates">Add your first candidate →</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recent.map((candidate) => (
+              <div key={candidate.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/70 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      {candidate.name.split(' ').map((n: string) => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{candidate.name}</p>
+                    <p className="text-xs text-muted-foreground">{candidate.position}</p>
                   </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={cn('capitalize', statusColors[candidate.status])}
-                >
+                <Badge variant="outline" className={cn('capitalize text-xs', statusColors[candidate.status])}>
                   {candidate.status}
                 </Badge>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -70,10 +70,10 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <HiringChart />
+          <HiringChart data={analyticsData.hiringTrend} />
         </div>
         <div>
-          <DepartmentMetrics />
+          <DepartmentMetrics data={analyticsData.departmentMetrics} />
         </div>
       </div>
 

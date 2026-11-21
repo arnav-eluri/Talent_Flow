@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { candidates } from '../data.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { persist } from '../store.js';
 
 const router = Router();
 
@@ -155,6 +156,7 @@ router.post('/', (req, res) => {
     };
 
     candidates.push(newCandidate);
+    persist('candidates', candidates);
     res.status(201).json({ success: true, data: newCandidate });
   } catch (error) {
     console.error('Create candidate error:', error);
@@ -186,6 +188,7 @@ router.put('/:id', (req, res) => {
     }
 
     candidates[index] = { ...candidates[index], ...req.body };
+    persist('candidates', candidates);
     res.json({ success: true, data: candidates[index] });
   } catch (error) {
     console.error('Update candidate error:', error);
@@ -202,6 +205,7 @@ router.delete('/:id', (req, res) => {
     }
 
     const deletedCandidate = candidates.splice(index, 1)[0];
+    persist('candidates', candidates);
     res.json({ success: true, message: 'Candidate deleted', data: deletedCandidate });
   } catch (error) {
     console.error('Delete candidate error:', error);
