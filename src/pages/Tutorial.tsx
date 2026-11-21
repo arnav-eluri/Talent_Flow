@@ -279,7 +279,7 @@ export default function Tutorial() {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-8 h-8" style={{ color: '#3B1E54' }} />
                 <div>
-                  <h3 className="text-lg font-semibold" style={{ color: '#3B1E54' }}>Congratulations! 🎉</h3>
+                  <h3 className="text-lg font-semibold" style={{ color: '#3B1E54' }}>Congratulations!</h3>
                   <p style={{ color: '#3B1E54' }}>You've explored all pages. You're ready to use the platform!</p>
                 </div>
               </div>

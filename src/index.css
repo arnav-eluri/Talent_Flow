@@ -39,6 +39,7 @@
     --ring: 172 65% 36%;
 
     --radius: 0.625rem;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 
     --sidebar-background: 172 55% 9%;
     --sidebar-foreground: 168 20% 65%;

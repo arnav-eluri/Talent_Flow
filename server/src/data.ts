@@ -7,20 +7,18 @@ const hashedPassword = bcrypt.hashSync('demo123', 10);
 export const users: User[] = load('users', [
   {
     id: '1',
-    email: 'sarah.johnson@company.com',
+    email: 'admin@example.com',
     password: hashedPassword,
     name: 'Sarah Johnson',
     role: 'hr',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
     department: 'Human Resources',
   },
   {
     id: '2',
-    email: 'arnav.eluri@company.com',
+    email: 'manager@example.com',
     password: hashedPassword,
-    name: 'Arnav Eluri',
+    name: 'Alex Morgan',
     role: 'manager',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Arnav&gender=male',
     department: 'Engineering',
   },
 ]);

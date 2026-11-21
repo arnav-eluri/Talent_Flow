@@ -134,7 +134,7 @@ export default function Settings() {
               <Label htmlFor="role">Role</Label>
               <Input
                 id="role"
-                value={user?.role || ''}
+                value={({ hr: 'HR Manager', manager: 'Manager', employee: 'Employee' } as Record<string,string>)[user?.role ?? ''] || user?.role || ''}
                 disabled
                 className="bg-slate-100"
               />

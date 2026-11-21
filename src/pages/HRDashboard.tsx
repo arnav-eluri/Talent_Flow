@@ -1,12 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -24,149 +17,54 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import {
-  Users,
-  UserPlus,
-  CheckCircle,
-  Clock,
-  TrendingUp,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react';
+import { Users, UserPlus, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
-const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
+const COLORS = [
+  'hsl(172, 65%, 36%)',
+  'hsl(199, 89%, 48%)',
+  'hsl(262, 83%, 58%)',
+  'hsl(38, 92%, 50%)',
+  'hsl(0, 84%, 60%)',
+  'hsl(215, 25%, 45%)',
+];
 
-interface DashboardStats {
-  totalEmployees: number;
-  newCandidatesMonth: number;
-  completedInterviewsMonth: number;
-  activeOnboardingTasks: number;
-  employeesOnboarding: number;
-  candidatesInInterview: number;
-  avgPerformanceScore: number;
-  employeesOffboarding: number;
-  departmentBreakdown: Array<{
-    name: string;
-    count: number;
-    openPositions: number;
-  }>;
-  hiringTrend: Array<{
-    month: string;
-    hires: number;
-    departures: number;
-  }>;
-  recentCandidates: Array<{
-    id: number;
-    name: string;
-    position: string;
-    status: string;
-    appliedAt: string;
-  }>;
-  upcomingInterviews: Array<{
-    id: number;
-    candidateName: string;
-    position: string;
-    scheduledAt: string;
-    type: string;
-  }>;
-  onboardingProgress: Array<{
-    employeeName: string;
-    position: string;
-    progress: number;
-    tasksCompleted: number;
-    totalTasks: number;
-  }>;
-}
-
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  color,
-  description,
-}: {
-  title: string;
-  value: number | string;
-  icon: React.ReactNode;
-  color: string;
-  description?: string;
-}) => (
-  <Card className="overflow-hidden">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value}</p>
-          {description && (
-            <p className="text-xs text-muted-foreground mt-1">{description}</p>
-          )}
-        </div>
-        <div className={`p-3 rounded-lg ${color}`}>{Icon}</div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const statusColors: Record<string, string> = {
-  new: 'bg-blue-500/10 text-blue-600',
-  screening: 'bg-yellow-500/10 text-yellow-600',
-  interview: 'bg-purple-500/10 text-purple-600',
-  offer: 'bg-green-500/10 text-green-600',
-  hired: 'bg-emerald-500/10 text-emerald-600',
-  rejected: 'bg-red-500/10 text-red-600',
+const statusDot: Record<string, string> = {
+  new: 'bg-blue-500',
+  screening: 'bg-yellow-500',
+  interview: 'bg-violet-500',
+  offer: 'bg-emerald-500',
+  hired: 'bg-green-500',
+  rejected: 'bg-red-500',
 };
 
 export default function HRDashboard() {
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-
-  const { data: dashboardData, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/dashboard/stats`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard stats');
-      }
-
-      return response.json();
-    },
-    refetchInterval: 10000, // Auto-refresh every 10 seconds
+  const { data: analytics, isLoading: loadingAnalytics } = useQuery({
+    queryKey: ['analytics'],
+    queryFn: () => api.getAnalytics(),
   });
 
-  // Manual refresh handler
-  const handleRefresh = async () => {
-    setLastRefresh(new Date());
-    await refetch();
-  };
+  const { data: candidates = [], isLoading: loadingCandidates } = useQuery({
+    queryKey: ['candidates'],
+    queryFn: () => api.getCandidates(),
+  });
 
-  useEffect(() => {
-    // Set up auto-refresh interval
-    const interval = setInterval(() => {
-      refetch();
-      setLastRefresh(new Date());
-    }, 10000);
+  const { data: interviews = [], isLoading: loadingInterviews } = useQuery({
+    queryKey: ['interviews'],
+    queryFn: () => api.getInterviews(),
+  });
 
-    return () => clearInterval(interval);
-  }, [refetch]);
+  const { data: onboardingTasks = [], isLoading: loadingOnboarding } = useQuery({
+    queryKey: ['onboarding'],
+    queryFn: () => api.getOnboardingTasks(),
+  });
+
+  const { data: employees = [], isLoading: loadingEmployees } = useQuery({
+    queryKey: ['employees'],
+    queryFn: () => api.getEmployees(),
+  });
+
+  const isLoading = loadingAnalytics || loadingCandidates || loadingInterviews || loadingOnboarding || loadingEmployees;
 
   if (isLoading) {
     return (
@@ -176,7 +74,7 @@ export default function HRDashboard() {
     );
   }
 
-  if (error || !dashboardData) {
+  if (!analytics) {
     return (
       <div className="p-8 text-center text-destructive">
         <p>Failed to load dashboard. Please try again.</p>
@@ -184,276 +82,208 @@ export default function HRDashboard() {
     );
   }
 
+  const recentCandidates = [...candidates]
+    .sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime())
+    .slice(0, 5);
+
+  const upcomingInterviews = interviews
+    .filter((i: any) => i.status === 'scheduled')
+    .slice(0, 4);
+
+  const activePendingTasks = onboardingTasks.filter((t: any) => t.status !== 'completed');
+  const completedInterviewsThisMonth = interviews.filter((i: any) => {
+    if (i.status !== 'completed') return false;
+    const d = new Date(i.scheduledAt);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+
+  const onboardingEmployees = employees.filter((e: any) => e.status === 'onboarding');
+  const onboardingProgress = onboardingEmployees.map((emp: any) => {
+    const empTasks = onboardingTasks.filter((t: any) => t.employeeId === emp.id);
+    const completed = empTasks.filter((t: any) => t.status === 'completed').length;
+    return {
+      name: emp.name,
+      position: emp.position,
+      completed,
+      total: empTasks.length,
+      progress: empTasks.length > 0 ? Math.round((completed / empTasks.length) * 100) : 0,
+    };
+  });
+
+  const pieData = analytics.departmentMetrics
+    .filter((d) => d.headcount > 0)
+    .map((d) => ({ name: d.name, value: d.headcount }));
+
   return (
-    <div className="space-y-6 animate-fade-in relative z-10">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">HR Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Real-time HR metrics and analytics
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Last updated: {lastRefresh.toLocaleTimeString()}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            className="gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">HR Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Real-time HR metrics and pipeline overview</p>
       </div>
 
-      {/* Key Stats Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Employees"
-          value={dashboardData.totalEmployees}
-          icon={<Users className="h-6 w-6 text-blue-600" />}
-          color="bg-blue-500/10"
-          description="Active employees"
-        />
-        <StatCard
-          title="New Candidates"
-          value={dashboardData.newCandidatesMonth}
-          icon={<UserPlus className="h-6 w-6 text-green-600" />}
-          color="bg-green-500/10"
-          description="This month"
-        />
-        <StatCard
-          title="Completed Interviews"
-          value={dashboardData.completedInterviewsMonth}
-          icon={<CheckCircle className="h-6 w-6 text-purple-600" />}
-          color="bg-purple-500/10"
-          description="This month"
-        />
-        <StatCard
-          title="Active Onboarding"
-          value={dashboardData.activeOnboardingTasks}
-          icon={<Clock className="h-6 w-6 text-orange-600" />}
-          color="bg-orange-500/10"
-          description="Tasks pending"
-        />
+        {[
+          { label: 'Total Employees', value: analytics.totalEmployees, icon: <Users className="h-5 w-5 text-primary" />, bg: 'bg-primary/10' },
+          { label: 'New Hires (30d)', value: analytics.newHires, icon: <UserPlus className="h-5 w-5 text-green-600" />, bg: 'bg-green-500/10' },
+          { label: 'Completed Interviews', value: completedInterviewsThisMonth, icon: <CheckCircle className="h-5 w-5 text-violet-600" />, bg: 'bg-violet-500/10' },
+          { label: 'Pending Onboarding', value: activePendingTasks.length, icon: <Clock className="h-5 w-5 text-orange-600" />, bg: 'bg-orange-500/10' },
+        ].map((s) => (
+          <Card key={s.label} className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-3">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{s.label}</p>
+                <div className={`p-2 rounded-xl shrink-0 ${s.bg}`}>{s.icon}</div>
+              </div>
+              <p className="text-5xl font-bold tracking-tight">{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Charts Row 1 */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        {/* Hiring Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Hiring Trend</CardTitle>
-            <CardDescription>Hires vs Departures</CardDescription>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base font-semibold">Hiring Trend</CardTitle>
+            <CardDescription className="text-xs">Hires vs Departures — last 6 months</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={dashboardData.hiringTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="hires"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  name="Hires"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="departures"
-                  stroke="#ef4444"
-                  strokeWidth={2}
-                  name="Departures"
-                />
+          <CardContent className="pt-4">
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={analytics.hiringTrend} margin={{ left: -20 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '10px', fontSize: 12 }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                <Line type="monotone" dataKey="hires" stroke="hsl(172, 65%, 36%)" strokeWidth={2} name="Hires" dot={false} />
+                <Line type="monotone" dataKey="departures" stroke="hsl(0, 84%, 60%)" strokeWidth={2} name="Departures" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Department Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Department Breakdown</CardTitle>
-            <CardDescription>Employees by department</CardDescription>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base font-semibold">Workforce by Department</CardTitle>
+            <CardDescription className="text-xs">Headcount distribution</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dashboardData.departmentBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, count }) => `${name}: ${count}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="count"
-                >
-                  {dashboardData.departmentBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+          <CardContent className="pt-4">
+            {pieData.length === 0 ? (
+              <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">No employee data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={2} dataKey="value">
+                    {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '10px', fontSize: 12 }} />
+                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Row 2 */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        {/* Department Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Department Details</CardTitle>
-            <CardDescription>Headcount and open positions</CardDescription>
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Recent Candidates</CardTitle>
+            <CardDescription className="text-xs">Latest pipeline activity</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dashboardData.departmentBreakdown}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#3b82f6" name="Employees" />
-                <Bar dataKey="openPositions" fill="#f59e0b" name="Open Positions" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Quick Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
-            <CardDescription>Additional metrics</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Avg Performance Score</span>
-              <span className="text-lg font-bold">
-                {dashboardData.avgPerformanceScore.toFixed(1)}/5.0
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Employees Onboarding</span>
-              <Badge variant="outline">{dashboardData.employeesOnboarding}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Candidates in Interview</span>
-              <Badge variant="outline">{dashboardData.candidatesInInterview}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Employees Offboarding</span>
-              <Badge variant="outline" className="bg-red-500/10 text-red-600">
-                {dashboardData.employeesOffboarding}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tables Row */}
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        {/* Recent Candidates */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Candidates</CardTitle>
-            <CardDescription>Latest applications</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dashboardData.recentCandidates.map((candidate) => (
-                    <TableRow key={candidate.id}>
-                      <TableCell className="font-medium">{candidate.name}</TableCell>
-                      <TableCell className="text-sm">{candidate.position}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={statusColors[candidate.status] || ''}
-                        >
-                          {candidate.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Interviews */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Interviews</CardTitle>
-            <CardDescription>Next scheduled interviews</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {dashboardData.upcomingInterviews.map((interview) => (
-                <div
-                  key={interview.id}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium text-sm">{interview.candidateName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {interview.position}
-                    </p>
+          <CardContent className="pt-0">
+            {recentCandidates.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No candidates yet</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {recentCandidates.map((c: any) => (
+                  <div key={c.id} className="flex items-center justify-between py-3 first:pt-0">
+                    <div>
+                      <p className="text-sm font-medium">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">{c.position}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${statusDot[c.status] ?? 'bg-gray-400'}`} />
+                      <span className="text-xs text-muted-foreground capitalize">{c.status}</span>
+                    </div>
                   </div>
-                  <Badge variant="secondary" className="capitalize">
-                    {interview.type}
-                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Upcoming Interviews</CardTitle>
+            <CardDescription className="text-xs">Scheduled and pending</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {upcomingInterviews.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No interviews scheduled</p>
+            ) : (
+              <div className="divide-y divide-border">
+                {upcomingInterviews.map((i: any) => (
+                  <div key={i.id} className="flex items-center justify-between py-3 first:pt-0">
+                    <div>
+                      <p className="text-sm font-medium">{i.candidateName}</p>
+                      <p className="text-xs text-muted-foreground">{i.position}</p>
+                    </div>
+                    <Badge variant="secondary" className="capitalize text-xs">{i.type}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {onboardingProgress.length > 0 && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Onboarding Progress</CardTitle>
+            <CardDescription className="text-xs">Employees currently onboarding</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-5">
+              {onboardingProgress.map((emp) => (
+                <div key={emp.name}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div>
+                      <p className="text-sm font-medium">{emp.name}</p>
+                      <p className="text-xs text-muted-foreground">{emp.position}</p>
+                    </div>
+                    <span className="text-xs font-semibold text-muted-foreground">{emp.completed}/{emp.total} tasks</span>
+                  </div>
+                  <Progress value={emp.progress} className="h-1.5" />
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </div>
+      )}
 
-      {/* Onboarding Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Onboarding Progress</CardTitle>
-          <CardDescription>Employee onboarding status</CardDescription>
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-0">
+          <CardTitle className="text-base font-semibold">Headcount by Department</CardTitle>
+          <CardDescription className="text-xs">Staff vs open positions</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {dashboardData.onboardingProgress.map((employee, index) => (
-              <div key={index}>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="font-medium">{employee.employeeName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {employee.position}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold">
-                    {employee.tasksCompleted}/{employee.totalTasks} tasks
-                  </span>
-                </div>
-                <Progress value={employee.progress} className="h-2" />
-              </div>
-            ))}
-          </div>
+        <CardContent className="pt-4">
+          {analytics.departmentMetrics.length === 0 ? (
+            <div className="h-[240px] flex items-center justify-center text-sm text-muted-foreground">No data yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={analytics.departmentMetrics} margin={{ left: -20 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '10px', fontSize: 12 }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="headcount" name="Headcount" fill="hsl(172, 65%, 36%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="openPositions" name="Open Positions" fill="hsl(199, 89%, 48%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>

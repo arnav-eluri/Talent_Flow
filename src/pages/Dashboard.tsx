@@ -8,6 +8,13 @@ import { DepartmentMetrics } from '@/components/dashboard/DepartmentMetrics';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { data: analyticsData, isLoading } = useQuery({
@@ -27,10 +34,10 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in relative z-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">
-          Welcome back, {user?.name?.split(' ')[0]}
+        <h1 className="text-2xl font-bold tracking-tight">
+          {getGreeting()}, {user?.name?.split(' ')[0]}
         </h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Here's what's happening with your hiring pipeline today.
         </p>
       </div>
@@ -38,14 +45,15 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
+          featured
           title="Total Employees"
           value={analyticsData.totalEmployees}
           change={8}
           trend="up"
-          icon={<Users className="h-5 w-5 text-primary" />}
+          icon={<Users className="h-5 w-5" />}
         />
         <StatCard
-          title="New Hires (This Month)"
+          title="New Hires"
           value={analyticsData.newHires}
           change={25}
           trend="up"
@@ -60,7 +68,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Avg. Time to Hire"
-          value={`${analyticsData.avgTimeToHire} days`}
+          value={`${analyticsData.avgTimeToHire}d`}
           change={-15}
           trend="down"
           icon={<Clock className="h-5 w-5 text-primary" />}

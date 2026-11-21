@@ -15,7 +15,7 @@ import {
   Briefcase,
   Home,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const navGroups = [
@@ -51,7 +51,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onToggle, onNavigate }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const location = useLocation();
   const { user, logout } = useAuth();
 
@@ -168,8 +168,7 @@ export function Sidebar({ onToggle, onNavigate }: SidebarProps) {
         {user && (
           <div className={cn('flex items-center gap-2.5', collapsed && 'justify-center')}>
             <Avatar className="h-7 w-7 shrink-0">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="text-[11px] bg-[hsl(var(--primary))] text-white font-semibold">
+              <AvatarFallback className="text-[11px] bg-[hsl(var(--primary))] text-black font-semibold">
                 {user.name.split(' ').map((n) => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
@@ -177,7 +176,7 @@ export function Sidebar({ onToggle, onNavigate }: SidebarProps) {
               <>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white truncate">{user.name}</p>
-                  <p className="text-[10px] text-[hsl(var(--sidebar-muted))] capitalize">{user.role}</p>
+                  <p className="text-[10px] text-[hsl(var(--sidebar-muted))]">{({ hr: 'HR Manager', manager: 'Manager', employee: 'Employee' } as Record<string,string>)[user.role] ?? user.role}</p>
                 </div>
                 <button
                   onClick={logout}

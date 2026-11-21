@@ -105,8 +105,8 @@ Two accounts are seeded automatically on first run:
 
 | Email | Password | Role |
 |---|---|---|
-| `sarah.johnson@company.com` | `demo123` | HR Manager |
-| `arnav.eluri@company.com` | `demo123` | Department Manager |
+| `admin@example.com` | `demo123` | HR Manager |
+| `manager@example.com` | `demo123` | Department Manager |
 
 You can switch roles at any time using the **Role** switcher in the top-right header without logging out.
 

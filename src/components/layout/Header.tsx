@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
@@ -71,44 +71,45 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden sm:flex h-8 text-xs gap-1.5 font-normal"
-            >
-              <span className="text-muted-foreground">Role:</span>
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 capitalize font-medium h-4"
+        {user?.role === 'hr' && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex h-8 text-xs gap-1.5 font-normal"
               >
-                {user?.role}
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuLabel className="text-xs text-muted-foreground font-normal pb-1">
-              Switch role (demo)
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {roles.map((role) => (
-              <DropdownMenuItem
-                key={role.value}
-                onClick={() => switchRole(role.value)}
-                className={user?.role === role.value ? 'bg-accent' : ''}
-              >
-                {role.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <span className="text-muted-foreground">Role:</span>
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0 capitalize font-medium h-4"
+                >
+                  {roles.find(r => r.value === user?.role)?.label ?? user?.role}
+                </Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal pb-1">
+                Switch view as
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {roles.map((role) => (
+                <DropdownMenuItem
+                  key={role.value}
+                  onClick={() => switchRole(role.value)}
+                  className={user?.role === role.value ? 'bg-accent' : ''}
+                >
+                  {role.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback className="text-[11px] bg-primary text-primary-foreground font-semibold">
                   {user?.name?.split(' ').map((n) => n[0]).join('')}
                 </AvatarFallback>
@@ -119,7 +120,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-0.5">
                 <p className="text-sm font-medium">{user?.name}</p>
-                <p className="text-xs text-muted-foreground font-normal">{user?.email}</p>
+                <p className="text-xs text-muted-foreground font-normal">{user?.email?.split('@')[0]}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
