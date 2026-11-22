@@ -7,6 +7,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Preloader from "@/components/Preloader";
 import { useState } from "react";
+import { initTheme } from "@/hooks/use-theme";
+
+initTheme();
 import Dashboard from "./pages/Dashboard";
 import HRDashboard from "./pages/HRDashboard";
 import CandidatesPage from "./pages/CandidatesPage";

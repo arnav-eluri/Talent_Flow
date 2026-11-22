@@ -299,6 +299,24 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  async getUsers() {
+    return this.request('/users');
+  }
+
+  async updateUserRole(id: string, role: string) {
+    return this.request(`/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    });
+  }
+
+  async updateUserPermissions(id: string, permissions: string[]) {
+    return this.request(`/users/${id}/permissions`, {
+      method: 'PATCH',
+      body: JSON.stringify({ permissions }),
+    });
+  }
 }
 
 export const api = new ApiClient();

@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   avatar?: string;
   department?: string;
+  permissions?: string[];
 }
 
 export interface Candidate {
