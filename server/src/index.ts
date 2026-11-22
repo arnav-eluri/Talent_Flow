@@ -1,18 +1,23 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import candidatesRoutes from './routes/candidates.js';
-import interviewsRoutes from './routes/interviews.js';
-import employeesRoutes from './routes/employees.js';
-import analyticsRoutes from './routes/analytics.js';
-import documentsRoutes from './routes/documents.js';
-import onboardingRoutes from './routes/onboarding.js';
-import offboardingRoutes from './routes/offboarding.js';
-import dashboardRoutes from './routes/dashboard.js';
-import usersRoutes from './routes/users.js';
+import { initDb } from './store.js';
 
 dotenv.config();
+
+// Must initialise SQLite before any module that calls load() / persist()
+await initDb();
+
+const { default: authRoutes } = await import('./routes/auth.js');
+const { default: candidatesRoutes } = await import('./routes/candidates.js');
+const { default: interviewsRoutes } = await import('./routes/interviews.js');
+const { default: employeesRoutes } = await import('./routes/employees.js');
+const { default: analyticsRoutes } = await import('./routes/analytics.js');
+const { default: documentsRoutes } = await import('./routes/documents.js');
+const { default: onboardingRoutes } = await import('./routes/onboarding.js');
+const { default: offboardingRoutes } = await import('./routes/offboarding.js');
+const { default: dashboardRoutes } = await import('./routes/dashboard.js');
+const { default: usersRoutes } = await import('./routes/users.js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,10 +25,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/candidates', candidatesRoutes);
 app.use('/api/interviews', interviewsRoutes);
@@ -61,7 +64,6 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 API endpoints available at http://localhost:${PORT}/api`);
-  console.log(`📖 API Documentation: http://localhost:${PORT}/`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`API endpoints available at http://localhost:${PORT}/api`);
 });

@@ -46,7 +46,7 @@ export default function HRDashboard() {
 
   const { data: candidates = [], isLoading: loadingCandidates } = useQuery({
     queryKey: ['candidates'],
-    queryFn: () => api.getCandidates(),
+    queryFn: () => api.getCandidates().then((r: any) => r?.data ?? []),
   });
 
   const { data: interviews = [], isLoading: loadingInterviews } = useQuery({
