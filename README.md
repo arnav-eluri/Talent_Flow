@@ -14,7 +14,7 @@ TalentFlow is a full-stack HR SaaS application for managing the complete employe
 
 ## Screenshot
 
-> Add a screenshot here (`public/screenshot.png`) once the app is running.
+![User Interface](public/screenshot.png)
 
 ---
 
